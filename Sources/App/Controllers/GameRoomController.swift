@@ -15,11 +15,25 @@ import Fluent
 // Контроллер игровых комнат
 final class GameRoomController {
     // Метод для создания новой игровой комнаты
-    func createRoom(_ req: Request) throws -> EventLoopFuture<GameRoom> {
-        let room = try req.content.decode(GameRoom.self)
-        room.status = "open"
-        return room.save(on: req.db).map { room }
-    }
+    // Метод для создания новой игровой комнаты
+        func createRoom(_ req: Request) throws -> EventLoopFuture<GameRoom> {
+            let room = try req.content.decode(GameRoom.self)
+            
+            // Проверяем, существует ли комната с таким же идентификатором
+            return GameRoom.query(on: req.db)
+                .filter(\GameRoom.$roomId == room.roomId)
+                .first()
+                .flatMap { existingRoom -> EventLoopFuture<GameRoom> in
+                    if let _ = existingRoom {
+                        // Если комната уже существует, возвращаем ошибку
+                        return req.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "Room with ID '\(room.roomId)' already exists"))
+                    } else {
+                        // Если комнаты с таким идентификатором не существует, сохраняем новую комнату
+                        room.status = "open"
+                        return room.save(on: req.db).map { room }
+                    }
+                }
+        }
     
     // Метод для присоединения к существующей игровой комнате
     func joinRoom(_ req: Request) throws -> EventLoopFuture<GameRoom> {
