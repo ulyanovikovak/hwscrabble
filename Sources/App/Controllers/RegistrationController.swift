@@ -6,17 +6,18 @@
 
 import Vapor
 import Fluent
+import JWT
 
 // Контроллер регистрации пользователей
 final class RegistrationController {
-    func register(_ req: Request) throws -> EventLoopFuture<User> {
+    func register(_ req: Request) throws -> EventLoopFuture<UserJWT> {
         let user = try req.content.decode(User.self)
         
         // Проверяем, существует ли пользователь с таким же логином
         return User.query(on: req.db)
             .filter(\User.$username == user.username)
             .first()
-            .flatMap { existingUser -> EventLoopFuture<User> in
+            .flatMap { existingUser -> EventLoopFuture<UserJWT> in
                 if let existingUser {
                     // Если пользователь уже существует, возвращаем ошибку
                     return req.eventLoop.makeFailedFuture(
@@ -26,8 +27,13 @@ final class RegistrationController {
                         )
                     )
                 } else {
-                    // Если пользователя с таким логином не существует, сохраняем нового пользователя
-                    return user.save(on: req.db).map { user }
+                    return user.save(on: req.db).map {
+                        let payload = UserJWT(
+                            expiration: ExpirationClaim.oneDay(),
+                            userId: user.id!
+                        )
+                        return payload
+                    }
                 }
         }
     }

@@ -6,6 +6,7 @@
 
 import Vapor
 import Fluent
+import JWT
 
 final class User: Model, Content {
     static let schema = "users"
@@ -28,3 +29,9 @@ final class User: Model, Content {
     }
 }
 
+extension User: JWTSubject {
+    // Реализация требуемого свойства, возвращающего идентификатор пользователя
+    var jwtSubject: String {
+        return self.id!.uuidString
+    }
+}
