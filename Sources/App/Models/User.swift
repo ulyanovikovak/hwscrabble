@@ -1,11 +1,8 @@
 //
-//  File.swift
-//  
+//  User.swift
 //
 //  Created by Юлия Новикова on 21.04.2024.
 //
-
-import Foundation
 
 import Vapor
 import Fluent

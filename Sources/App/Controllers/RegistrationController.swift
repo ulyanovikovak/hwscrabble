@@ -1,11 +1,9 @@
 //
-//  File.swift
-//  
+//  RegistrationController.swift
 //
 //  Created by Юлия Новикова on 21.04.2024.
 //
 
-import Foundation
 import Vapor
 import Fluent
 
@@ -19,19 +17,18 @@ final class RegistrationController {
             .filter(\User.$username == user.username)
             .first()
             .flatMap { existingUser -> EventLoopFuture<User> in
-                if let _ = existingUser {
+                if let existingUser {
                     // Если пользователь уже существует, возвращаем ошибку
-                    return req.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "User with username '\(user.username)' already exists"))
+                    return req.eventLoop.makeFailedFuture(
+                        Abort(
+                            .badRequest,
+                            reason: "User with username '\(user.username)' already exists"
+                        )
+                    )
                 } else {
                     // Если пользователя с таким логином не существует, сохраняем нового пользователя
                     return user.save(on: req.db).map { user }
                 }
-            }
+        }
     }
 }
-
-
-
-
-
-

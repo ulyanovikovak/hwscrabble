@@ -1,20 +1,14 @@
 //
-//  File.swift
-//  
+//  GameRoomController.swift
 //
-//  Created by Юлия Новикова on 21.04.2024.
+//  Created by Юлия Новикова
 //
 
-import Foundation
-import Vapor
-
-// Контроллер игровых комнат
 import Vapor
 import Fluent
 
 // Контроллер игровых комнат
 final class GameRoomController {
-    // Метод для создания новой игровой комнаты
     // Метод для создания новой игровой комнаты
         func createRoom(_ req: Request) throws -> EventLoopFuture<GameRoom> {
             let room = try req.content.decode(GameRoom.self)
@@ -24,7 +18,7 @@ final class GameRoomController {
                 .filter(\GameRoom.$roomId == room.roomId)
                 .first()
                 .flatMap { existingRoom -> EventLoopFuture<GameRoom> in
-                    if let _ = existingRoom {
+                    if let existingRoom {
                         // Если комната уже существует, возвращаем ошибку
                         return req.eventLoop.makeFailedFuture(Abort(.badRequest, reason: "Room with ID '\(room.roomId)' already exists"))
                     } else {

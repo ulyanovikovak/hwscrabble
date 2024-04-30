@@ -1,6 +1,5 @@
 //
-//  File.swift
-//  
+//  ScrabbleGame.swift
 //
 //  Created by Юлия Новикова on 21.04.2024.
 //
